@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz App</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      background-color: #f8faff;
+    }
+    h1 { margin-top: 50px; }
+    .question-box {
+      margin: 20px auto;
+      padding: 20px;
+      width: 50%;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .confetti-button {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      display: inline-block;
+      font-size: 1em;
+      padding: 1em 2em;
+      background-color: #ff0081;
+      color: #fff;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
+      box-shadow: 0 2px 25px rgba(255, 0, 130, 0.5);
+    }
+    .confetti-button:focus { outline: 0; }
+    .radio-input {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .radio-input label {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px;
+      width: 100%;
+      cursor: pointer;
+      height: 50px;
+      background-color: #202030;
+      border-radius: 10px;
+      position: relative;
+      color: #fff;
+      transition: background-color 0.3s;
+    }
+    .radio-input label:hover {
+      background-color: #48506f;
+    }
+    .radio-input input[type="radio"] {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      position: relative;
+      cursor: pointer;
+    }
+    .radio-input input[type="radio"]:hover {
+      border-color: #ff0081;
+    }
+    .radio-input input[type="radio"]:checked {
+      background-color: #ff0081;
+    }
+    .radio-input input[type="radio"]:checked::before {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #message {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>The HTML Hunt</h1>
+  <div id="quiz-container" class="question-box"></div>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+  <script>
+    // Confetti setup
+    const count = 200, defaults = { origin: { y: 0.7 } };
+    function fire(particleRatio, opts) {
+      confetti(Object.assign({}, defaults, opts, {
+        particleCount: Math.floor(count * particleRatio),
+      }));
+    }
+    function showConfetti() {
+      fire(0.25, { spread: 26, startVelocity: 55 });
+      fire(0.2, { spread: 60 });
+      fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+      fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+      fire(0.1, { spread: 120, startVelocity: 45 });
+    }
+
+    // Quiz questions and options about HTML tags
+    const quizData = [
+      { question: "Which tag is used for the largest heading?", options: ["&lt;h1&gt;", "&lt;h6&gt;", "&lt;h3&gt;"], correct: 0 },
+      { question: "Which tag is used for creating a paragraph?", options: ["&lt;p&gt;", "&lt;div&gt;", "&lt;h2&gt;"], correct: 0 },
+      { question: "Which attribute is used to add a link in &lt;a&gt; tag?", options: ["alt", "href", "src"], correct: 1 },
+      { question: "Which attribute is used to specify an image source in the &lt;img&gt; tag?", options: ["src", "alt", "href"], correct: 0 },
+      { question: "What is the purpose of the 'alt' attribute in an image tag?", options: ["Adds a link", "Provides alternate text", "Changes the image size"], correct: 1 },
+      { question: "Which tag creates an unordered list?", options: ["&lt;ul&gt;", "&lt;ol&gt;", "&lt;li&gt;"], correct: 0 },
+      { question: "Which HTML element is used to define the footer of a document?", options: ["&lt;footer&gt;", "&lt;head&gt;", "&lt;section&gt;"], correct: 0 },
+      { question: "Which tag is used to create a line break?", options: ["&lt;br&gt;", "&lt;break&gt;", "&lt;hr&gt;"], correct: 0 },
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedAnswers = Array(quizData.length).fill(null); // Store selected answers
+
+    function loadQuestion() {
+      const questionData = quizData[currentQuestionIndex];
+      const quizContainer = document.getElementById("quiz-container");
+      quizContainer.innerHTML = `        
+        <div>
+          <h2>${questionData.question}</h2>
+          <div class="radio-input">
+            ${questionData.options.map((option, index) => `
+              <label>
+                <input type="radio" name="answer" value="${index}" ${selectedAnswers[currentQuestionIndex] === index ? 'checked' : ''}>
+                <span class="text">${option}</span>
+              </label>`).join("")}
+          </div>
+          <div id="message"></div>
+          <div class="button-container">
+            <button class="confetti-button" id="check-button">Check</button>
+            <button class="confetti-button" id="back-button" style="${currentQuestionIndex === 0 ? 'display:none;' : 'display:inline-block;'}">Back</button>
+            <button class="confetti-button" id="next-button">Next</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("check-button").addEventListener("click", checkAnswer);
+      document.getElementById("next-button").addEventListener("click", nextQuestion);
+      document.getElementById("back-button").addEventListener("click", previousQuestion);
+    }
+
+    function checkAnswer() {
+      const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+      const message = document.getElementById("message");
+
+      if (!selectedAnswer) {
+        message.textContent = "Please select an answer!";
+        return;
+      }
+
+      const answerIndex = parseInt(selectedAnswer.value);
+      selectedAnswers[currentQuestionIndex] = answerIndex; // Store the selected answer
+
+      if (answerIndex === quizData[currentQuestionIndex].correct) {
+        score++;
+        message.textContent = "Correct!";
+        showConfetti();
+      } else {
+        message.textContent = "Try again!";
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIndex < quizData.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+      } else {
+        displayResult();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        loadQuestion();
+      }
+    }
+
+    function displayResult() {
+      const quizContainer = document.getElementById("quiz-container");
+      quizContainer.innerHTML = `
+        <h2>Quiz Completed!</h2>
+        <p>Your score: ${score} out of ${quizData.length}</p>
+        <button class="confetti-button" onclick="location.reload();">Restart Quiz</button>
+      `;
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
